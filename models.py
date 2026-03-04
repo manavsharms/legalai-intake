@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
-from app.database import Base
+from database import Base
 
 
 class Lawyer(Base):
@@ -30,3 +30,4 @@ class Lead(Base):
 
     lawyer_id = Column(Integer, ForeignKey("lawyers.id"))
     lawyer = relationship("Lawyer", back_populates="leads")
+
