@@ -1,10 +1,10 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from app.database import engine, get_db
-from app import models, schemas
+from database import engine, get_db
+import models, schemas
 from fastapi.middleware.cors import CORSMiddleware
-from app.auth import (
+from auth import (
     hash_password,
     verify_password,
     create_access_token,
@@ -233,4 +233,5 @@ def get_dashboard(
         "weak_cases": weak,
         "signed_cases": signed,
         "conversion_rate": f"{round(conversion_rate, 2)}%"
+
     }
