@@ -2,7 +2,8 @@ from fastapi import FastAPI, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from database import engine, get_db
-import models, schemas
+import models
+import schemas
 from fastapi.middleware.cors import CORSMiddleware
 from auth import (
     hash_password,
@@ -235,3 +236,4 @@ def get_dashboard(
         "conversion_rate": f"{round(conversion_rate, 2)}%"
 
     }
+
