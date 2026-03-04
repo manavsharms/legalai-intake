@@ -4,8 +4,8 @@ from passlib.context import CryptContext
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
-from app.database import get_db
-from app import models
+from database import get_db
+import models
 
 SECRET_KEY = "supersecretkey"
 ALGORITHM = "HS256"
@@ -52,3 +52,4 @@ def get_current_lawyer(
         raise credentials_exception
 
     return lawyer
+
