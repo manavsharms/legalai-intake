@@ -1,7 +1,8 @@
 fastapi
 uvicorn
-jinja2
 sqlalchemy
-passlib[bcrypt]
+jinja2
+passlib
 python-jose
 python-multipart
+psycopg2-binary
