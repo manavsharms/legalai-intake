@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+    body {
+        font-family: Arial;
+        padding: 40px;
+    }
+
+    input {
+        display: block;
+        margin: 10px 0;
+        padding: 8px;
+        width: 250px;
+    }
+
+    button {
+        padding: 8px 12px;
+        cursor: pointer;
+    }
+</style>
+    <title>Legal AI Intake - Login</title>
+</head>
+<script>
+async function login() {
+    alert("Button clicked");
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    try {
+        const formData = new URLSearchParams();
+        formData.append("username", email);
+        formData.append("password", password);
+
+        const response = await fetch("http://127.0.0.1:9000/login/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: formData
+        });
+
+        console.log("Status:", response.status);
+
+        const data = await response.json();
+        console.log("Response:", data);
+
+       if (response.ok) {
+    // Save token
+    localStorage.setItem("token", data.access_token);
+
+    // Redirect to dashboard
+    window.location.href = "dashboard.html";
+
+        } else {
+            alert("Error: " + data.detail);
+        }
+
+    } catch (error) {
+        console.log("Fetch Error:", error);
+        alert("Fetch failed. Check console.");
+    }
+}
+</script>
+<body>
+<h2>Lawyer Login</h2>
+
+<input type="email" id="email" placeholder="Enter Email">
+
+<input type="password" id="password" placeholder="Enter Password">
+
+<button onclick="login()">Login</button>
+
+<p id="error"></p>
+</body>
+</html>

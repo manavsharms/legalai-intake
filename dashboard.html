@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Legal AI Intake - Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f4f6f9;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #1e293b;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h2 {
+            margin: 0;
+        }
+
+        .logout-btn {
+            background: #ef4444;
+            border: none;
+            padding: 8px 12px;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .container {
+            padding: 40px;
+        }
+
+        .cards {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            flex: 1;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            text-align: center;
+            transition: 0.3s ease;
+        }
+
+        .card h3 {
+    margin: 0;
+    font-size: 36px;
+    font-weight: bold;
+    color: #1e293b;
+}
+
+        .card p {
+    margin: 8px 0 0;
+    color: #64748b;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.card:hover {
+    transform: translateY(-5px);
+}
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        th {
+            background: #1e293b;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        select {
+            padding: 6px;
+            border-radius: 5px;
+        }
+        .badge {
+    padding: 5px 10px;
+    border-radius: 20px;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.strong {
+    background-color: #16a34a;
+}
+
+.medium {
+    background-color: #eab308;
+}
+
+.weak {
+    background-color: #dc2626;
+}
+    </style>
+</head>
+
+<body>
+
+<div class="navbar">
+    <h2>Legal AI Intake</h2>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+</div>
+
+<div class="container">
+<h3>Create New Lead</h3>
+
+<div style="background:white; padding:20px; border-radius:10px; margin-bottom:30px; box-shadow:0 4px 10px rgba(0,0,0,0.05);">
+
+    <input type="text" id="name" placeholder="Client Name" style="padding:8px; margin:5px; width:200px;">
+    <input type="text" id="accident" placeholder="Accident Type" style="padding:8px; margin:5px; width:200px;">
+    <input type="text" id="injury" placeholder="Injury Description" style="padding:8px; margin:5px; width:200px;">
+    <input type="text" id="liability" placeholder="Liability" style="padding:8px; margin:5px; width:200px;">
+
+    <button onclick="createLead()" style="padding:8px 12px; background:#1e293b; color:white; border:none; border-radius:5px;">
+        Add Lead
+    </button>
+
+</div>
+    <div class="cards" id="stats"></div>
+
+    <h3>Leads</h3>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Accident</th>
+                <th>Strength</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="leadsTable"></tbody>
+    </table>
+
+</div>
+
+<script>
+const API_URL = "http://127.0.0.1:9000";
+
+function logout() {
+    localStorage.removeItem("token");
+    window.location.href = "index.html";
+}
+
+async function loadDashboard() {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        window.location.href = "index.html";
+        return;
+    }
+
+    // Load Stats
+    const statsRes = await fetch(`${API_URL}/dashboard/`, {
+        headers: { "Authorization": "Bearer " + token }
+    });
+
+    const stats = await statsRes.json();
+
+    document.getElementById("stats").innerHTML = `
+        <div class="card">
+            <h3>${stats.total_leads}</h3>
+            <p>Total Leads</p>
+        </div>
+        <div class="card">
+            <h3>${stats.strong_cases}</h3>
+            <p>Strong Cases</p>
+        </div>
+        <div class="card">
+            <h3>${stats.signed_cases}</h3>
+            <p>Signed Cases</p>
+        </div>
+        <div class="card">
+            <h3>${stats.conversion_rate}</h3>
+            <p>Conversion Rate</p>
+        </div>
+    `;
+
+    // Load Leads
+    const leadsRes = await fetch(`${API_URL}/leads/`, {
+        headers: { "Authorization": "Bearer " + token }
+    });
+
+    const leads = await leadsRes.json();
+
+    const table = document.getElementById("leadsTable");
+    table.innerHTML = "";
+
+    leads.forEach(lead => {
+        table.innerHTML += `
+            <tr>
+                <td>${lead.name}</td>
+                <td>${lead.accident_type}</td>
+                <td>
+    <span class="badge ${lead.case_strength.toLowerCase()}">
+        ${lead.case_strength}
+    </span>
+</td>
+                <td>
+                    <select onchange="updateStatus(${lead.id}, this.value)">
+                        <option ${lead.status=="New"?"selected":""}>New</option>
+                        <option ${lead.status=="Contacted"?"selected":""}>Contacted</option>
+                        <option ${lead.status=="Signed"?"selected":""}>Signed</option>
+                        <option ${lead.status=="Rejected"?"selected":""}>Rejected</option>
+                    </select>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+async function updateStatus(id, status) {
+    const token = localStorage.getItem("token");
+
+    await fetch(`${API_URL}/leads/${id}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify({ status })
+    });
+
+    loadDashboard();
+}
+
+loadDashboard();
+async function createLead() {
+    const token = localStorage.getItem("token");
+
+    const leadData = {
+        name: document.getElementById("name").value,
+        accident_type: document.getElementById("accident").value,
+        injury_description: document.getElementById("injury").value,
+        liability: document.getElementById("liability").value,
+        status: "New"
+    };
+
+    const response = await fetch(`${API_URL}/leads/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify(leadData)
+    });
+
+    if (response.ok) {
+        alert("Lead added successfully!");
+        loadDashboard();
+    } else {
+        alert("Error creating lead");
+    }
+}
+</script>
+
+</body>
+</html>
