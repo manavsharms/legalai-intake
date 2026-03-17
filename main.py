@@ -234,6 +234,9 @@ def get_dashboard(
         "weak_cases": weak,
         "signed_cases": signed,
         "conversion_rate": f"{round(conversion_rate, 2)}%"
+@app.get("/")
+def home():
+    return {"message": "Legal AI API is running"}
 
     }
 
