@@ -226,7 +226,11 @@ def get_dashboard(
     signed = len([l for l in leads if l.status == "Signed"])
 
     conversion_rate = (signed / total * 100) if total > 0 else 0
+@app.get("/")
+def home():
+    return {"message": "Legal AI API is running"}
 
+    }
     return {
         "total_leads": total,
         "strong_cases": strong,
@@ -234,9 +238,5 @@ def get_dashboard(
         "weak_cases": weak,
         "signed_cases": signed,
         "conversion_rate": f"{round(conversion_rate, 2)}%"
-@app.get("/")
-def home():
-    return {"message": "Legal AI API is running"}
 
-    }
 
